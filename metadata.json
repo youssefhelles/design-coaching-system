@@ -1,0 +1,7 @@
+{
+  "name": "The System - Design Training",
+  "description": "A high-end 1-on-1 design training platform landing page featuring a structured three-phase methodology and AI-powered design career assistant.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
