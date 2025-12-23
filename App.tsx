@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import ThemeToggle from './components/ThemeToggle';
 import FloatingNav from './components/FloatingNav';
-import { STEPS, TRACKS, TIMELINE } from './constants';
+import { STEPS, TRACKS, TIMELINE, FAQS, TESTIMONIALS } from './constants';
 
 const App: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -39,7 +39,7 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto pt-20 pb-32 px-6">
+      <main className="max-w-7xl mx-auto pt-20 pb-20 px-6">
         {/* Hero Section */}
         <section className="relative min-h-[45vh] flex flex-col items-center justify-center text-center gap-4 mb-20 px-4">
           <div className="absolute top-0 right-1/4 w-72 md:w-96 h-72 md:h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none opacity-50"></div>
@@ -79,7 +79,7 @@ const App: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {STEPS.map((step, index) => (
+            {STEPS.map((step) => (
               <div key={step.id} className="bg-white dark:bg-surface-dark p-8 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all group">
                 <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center mb-6 group-hover:bg-primary/10 transition-colors">
                   <span className={`material-icons-round ${step.iconColor} text-2xl`}>{step.icon}</span>
@@ -147,6 +147,23 @@ const App: React.FC = () => {
           </button>
         </section>
 
+        {/* Testimonials Section */}
+        <section className="mb-28">
+          <h2 className="text-2xl md:text-4xl font-black text-center mb-12">قصص نجاح حقيقية</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {TESTIMONIALS.map((t, i) => (
+              <div key={i} className="bg-white dark:bg-surface-dark p-8 rounded-3xl border border-gray-100 dark:border-gray-800 flex gap-4">
+                <img src={t.avatar} alt={t.name} className="w-16 h-16 rounded-full bg-gray-100" />
+                <div>
+                  <h4 className="font-bold text-gray-900 dark:text-white">{t.name}</h4>
+                  <p className="text-xs text-primary mb-3">{t.role}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 italic">"{t.text}"</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Timeline Section */}
         <section id="timeline-section" className="mb-28 scroll-mt-24">
           <div className="max-w-2xl mx-auto">
@@ -165,8 +182,26 @@ const App: React.FC = () => {
           </div>
         </section>
 
+        {/* FAQ Section */}
+        <section className="mb-28 max-w-3xl mx-auto">
+          <h2 className="text-2xl md:text-4xl font-black text-center mb-10">الأسئلة الشائعة</h2>
+          <div className="space-y-4">
+            {FAQS.map((faq, i) => (
+              <details key={i} className="group bg-white dark:bg-surface-dark rounded-2xl border border-gray-100 dark:border-gray-800 p-4 transition-all hover:shadow-sm">
+                <summary className="font-bold cursor-pointer list-none flex justify-between items-center text-sm md:text-base">
+                  {faq.question}
+                  <span className="material-icons-round text-primary transition-transform group-open:rotate-180">expand_more</span>
+                </summary>
+                <p className="mt-4 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                  {faq.answer}
+                </p>
+              </details>
+            ))}
+          </div>
+        </section>
+
         {/* Join Section */}
-        <section id="join-section" className="bg-primary text-white rounded-[3rem] p-10 md:p-20 text-center shadow-2xl shadow-primary/20 scroll-mt-24 relative overflow-hidden">
+        <section id="join-section" className="bg-primary text-white rounded-[3rem] p-10 md:p-20 text-center shadow-2xl shadow-primary/20 scroll-mt-24 relative overflow-hidden mb-20">
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-50"></div>
           <div className="relative z-10">
             <h2 className="text-3xl md:text-5xl font-black mb-6">جاهز لبناء نظامك الخاص؟</h2>
@@ -189,22 +224,27 @@ const App: React.FC = () => {
             </form>
           </div>
         </section>
-
-        {/* Stats Section */}
-        <section className="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { label: 'توجيه فردي', value: '1:1' },
-            { label: 'ساعات تدريبية', value: '+40' },
-            { label: 'مشاريع حقيقية', value: '5' },
-            { label: 'دعم مستمر', value: '∞' }
-          ].map((stat, i) => (
-            <div key={i} className="bg-white dark:bg-surface-dark p-6 rounded-3xl border border-gray-100 dark:border-gray-800 text-center shadow-sm hover:translate-y-[-5px] transition-transform">
-              <span className="block text-3xl font-black text-primary mb-2">{stat.value}</span>
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{stat.label}</span>
-            </div>
-          ))}
-        </section>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-white dark:bg-surface-dark border-t border-gray-100 dark:border-gray-800 py-12 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <span className="material-icons-round text-white text-xl">layers</span>
+            </div>
+            <span className="font-bold text-lg text-gray-900 dark:text-white">نظام المصمم المحترف</span>
+          </div>
+          
+          <div className="flex gap-6">
+            <a href="#" className="text-gray-400 hover:text-primary transition-colors">تويتر (X)</a>
+            <a href="#" className="text-gray-400 hover:text-primary transition-colors">إنستغرام</a>
+            <a href="#" className="text-gray-400 hover:text-primary transition-colors">لينكدإن</a>
+          </div>
+          
+          <p className="text-sm text-gray-500 dark:text-gray-400">© 2024 جميع الحقوق محفوظة للنظام التدريبي.</p>
+        </div>
+      </footer>
 
       {/* Floating Navigation (Available on all devices) */}
       <FloatingNav />
