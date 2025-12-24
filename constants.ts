@@ -1,5 +1,5 @@
 
-import { Step, Track, TimelineStep } from './types';
+import { Step, Track, TimelineStep, Testimonial } from './types';
 
 export const STEPS: Step[] = [
   {
@@ -25,6 +25,30 @@ export const STEPS: Step[] = [
     description: 'كيف تحول المهارة إلى مال. استراتيجيات التسعير، التفاوض، وبناء معرض أعمال يجذب العملاء ذوي الميزانيات العالية (High-Ticket Clients).',
     icon: 'monetization_on',
     iconColor: 'text-green-500'
+  }
+];
+
+export const TOOLS = [
+  {
+    name: 'موقع كانفا',
+    description: 'سوف نستخدمه في التصميم',
+    icon: 'palette',
+    color: 'from-blue-400 to-indigo-600',
+    extra: ''
+  },
+  {
+    name: 'موقع Image FX',
+    description: 'سوف نستخدمه في توليد العناصر باستخدام الذكاء الاصطناعي',
+    icon: 'auto_awesome',
+    color: 'from-purple-500 to-pink-500',
+    extra: ''
+  },
+  {
+    name: 'موقع جيميناي',
+    description: 'سوف نستخدمه في توليد الافكار بطرق احترافية',
+    icon: 'auto_graph',
+    color: 'from-blue-600 to-cyan-400',
+    extra: 'سوف تتعلم كتابة اوامر احترافية'
   }
 ];
 
@@ -81,25 +105,31 @@ export const TIMELINE: TimelineStep[] = [
 
 export const FAQS = [
   {
+    question: "هل سأتعلم التصميم عن طريق كانفا فقط ؟",
+    answer: "سوف تتعلم التصميم باستخدام كانفا مع استخدام ادوات الذكاء الاصطناعي بحيث ترفع مستواك الى مستوى اخر!"
+  },
+  {
+    question: "هل سوف اتعلم باستخدام الجوال التصميم ؟",
+    answer: "تستطيع ان تتطبق جميع دروس الدورة الفردية باستخدام الجوال ولكن نفضل <strong class='font-black text-gray-900 dark:text-white'>ان يكون لديك لابتوب</strong> او حتى ايباد لتحقيق سلاسة في الشرح."
+  },
+  {
     question: "هل أحتاج لخبرة سابقة في التصميم؟",
     answer: "لا نهائياً. البرنامج مصمم ليأخذك من الصفر أو من مستوى الهواية إلى الاحتراف التجاري."
   },
   {
     question: "ما الفرق بين هذا البرنامج والكورسات المسجلة؟",
     answer: "الفرق هو 'التوجيه المباشر'. في الكورسات أنت تشاهد فقط، هنا نحن نعمل معاً على تصاميمك ونصحح أخطاءك لحظة بلحظة."
-  },
-  {
-    question: "هل سأحصل على شهادة؟",
-    answer: "ستحصل على ما هو أهم من الشهادة: 'معرض أعمال حقيقي' وعقلية مصمم محترف قادرة على جذب العملاء."
   }
 ];
 
-export const TESTIMONIALS = [
+export const TESTIMONIALS: Testimonial[] = [
   {
-    name: "سارة الأحمد",
-    role: "مصممة سوشيال ميديا",
-    text: "كنت أعرف الأدوات جيداً لكنني لم أكن أعرف كيف أصنع تصميماً يرضي العميل. بعد 21 يوماً تغيرت نظرتي تماماً للألوان والكتل.",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sara"
+    name: "سارة لاين",
+    role: "مصممة وباحثة جمال",
+    text: "خذيت دورات وايد من قبل، بس اللي صج لقيته مميز عندك إنك ما بخلت علي بالمعلومة.. حشيت مخي حشو بالمعلومات وعطيتني كل شيء بعكس الدورات اللي كانت تعطيني بالقطاره.",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=SarahLine",
+    instagram: "https://www.instagram.com/sarah.line.kw/",
+    audioUrl: "https://raw.githubusercontent.com/youssef-ayman/assets/main/testimonial_sarah.mp3"
   },
   {
     name: "محمد خالد",
