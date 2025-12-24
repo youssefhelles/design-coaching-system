@@ -2,7 +2,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ThemeToggle from './components/ThemeToggle';
 import FloatingNav from './components/FloatingNav';
+import Changelog from './components/Changelog';
 import { STEPS, TRACKS, TIMELINE, FAQS, TESTIMONIALS, TOOLS } from './constants';
+
+const getMailData = (option: string, email: string) => {
+  return {
+    subject: `النظام: ${option}`,
+    body: `مرحباً يوسف،\n\nأنا مهتم ببرنامج "النظام" التدريبي.\n\nالخيار المختار: ${option}\nبريدي الإلكتروني: ${email}\n\nأتطلع للتواصل معك ومعرفة التفاصيل.`
+  };
+};
 
 const FAQItem: React.FC<{ faq: { question: string, answer: string }, isOpen: boolean, onToggle: () => void }> = ({ faq, isOpen, onToggle }) => {
   return (
@@ -44,41 +52,73 @@ const FAQItem: React.FC<{ faq: { question: string, answer: string }, isOpen: boo
 
 const AudioPlayer: React.FC<{ src: string }> = ({ src }) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const togglePlay = () => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
+        setIsPlaying(false);
       } else {
-        audioRef.current.play().catch(err => console.error("Audio play blocked", err));
+        setIsLoading(true);
+        setHasError(false);
+        audioRef.current.play().then(() => {
+          setIsPlaying(true);
+          setIsLoading(false);
+        }).catch(err => {
+          console.error("Audio play failed:", err);
+          setIsLoading(false);
+          setHasError(true);
+          setIsPlaying(false);
+        });
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
   return (
-    <div className="mt-4 flex items-center gap-3 bg-primary/5 dark:bg-primary/10 p-3 rounded-2xl border border-primary/10">
-      <audio ref={audioRef} src={src} onEnded={() => setIsPlaying(false)} />
-      <button 
-        onClick={togglePlay}
-        className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-transform"
-      >
-        <span className="material-icons-round">{isPlaying ? 'pause' : 'play_arrow'}</span>
-      </button>
-      <div className="flex-1">
-        <div className="text-[10px] font-bold text-primary mb-1 uppercase tracking-wider">استمع إلى رأي العميلة</div>
-        <div className="flex gap-0.5 items-end h-4">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-            <div 
-              key={i} 
-              className={`w-1 bg-primary rounded-full transition-all duration-300 ${isPlaying ? 'animate-pulse' : 'h-1 opacity-30'}`}
-              style={{ 
-                height: isPlaying ? `${Math.random() * 100}%` : '4px',
-                animationDelay: `${i * 0.1}s` 
-              }}
-            ></div>
-          ))}
+    <div className={`mt-4 flex flex-col gap-2 p-3 rounded-2xl border transition-colors ${hasError ? 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800' : 'bg-primary/5 dark:bg-primary/10 border-primary/10'}`}>
+      <div className="flex items-center gap-3">
+        <audio 
+          ref={audioRef} 
+          src={src} 
+          preload="none"
+          onEnded={() => setIsPlaying(false)} 
+          onPlaying={() => { setIsLoading(false); setIsPlaying(true); }}
+          onError={() => { setHasError(true); setIsLoading(false); }}
+        />
+        <button 
+          onClick={togglePlay}
+          disabled={isLoading}
+          className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95 disabled:opacity-50 ${hasError ? 'bg-gray-400 text-white' : 'bg-primary text-white shadow-primary/20 hover:scale-105'}`}
+        >
+          {isLoading ? (
+            <span className="material-icons-round animate-spin">sync</span>
+          ) : (
+            <span className="material-icons-round">{isPlaying ? 'pause' : 'play_arrow'}</span>
+          )}
+        </button>
+        <div className="flex-1">
+          <div className="text-[10px] font-bold text-primary mb-1 uppercase tracking-wider">
+            {isLoading ? 'جاري التحميل...' : hasError ? 'عذراً، تعذر التشغيل المباشر' : 'استمع إلى رأي العميلة'}
+          </div>
+          {!hasError ? (
+            <div className="flex gap-0.5 items-end h-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                <div 
+                  key={i} 
+                  className={`w-1 bg-primary rounded-full transition-all duration-300 ${isPlaying && !isLoading ? 'animate-pulse' : 'h-1 opacity-30'}`}
+                  style={{ 
+                    height: isPlaying && !isLoading ? `${20 + Math.random() * 80}%` : '4px',
+                    animationDelay: `${i * 0.1}s` 
+                  }}
+                ></div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-[10px] text-red-500 font-medium">يرجى استخدام الرابط المباشر أدناه</div>
+          )}
         </div>
       </div>
     </div>
@@ -95,7 +135,7 @@ const useRevealOnScroll = () => {
       });
     }, { threshold: 0.1 });
 
-    const elements = document.querySelectorAll('.reveal-on-scroll');
+    const elements = document.querySelectorAll('.reveal-on-scroll, .reveal-left, .reveal-right');
     elements.forEach(el => observer.observe(el));
 
     return () => observer.disconnect();
@@ -113,12 +153,8 @@ const App: React.FC = () => {
 
   const RECIPIENT = "ye444sf@gmail.com";
   const WHATSAPP_URL = 'https://wa.me/972597713882';
-
-  const getMailData = (option: string, userEmail: string) => {
-    const subject = `🚀 طلب تسجيل جديد: ${option}`;
-    const body = `مرحباً أ. يوسف،\n\nأرغب في التواصل معك بخصوص الخيار الذي اخترته: [${option}]\n\nبريدي الإلكتروني للمتابعة: ${userEmail}\n\nشكراً لك، وبانتظار ردك.`;
-    return { subject, body };
-  };
+  const INSTAGRAM_URL = 'https://www.instagram.com/youssefaymanc/';
+  const LINKEDIN_URL = 'https://www.linkedin.com/in/youssefhelles/';
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,7 +201,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-bg-light dark:bg-bg-dark transition-colors duration-300">
+    <div className="min-h-screen bg-bg-light dark:bg-bg-dark transition-colors duration-300 font-sans text-right" dir="rtl">
       {/* Navigation */}
       <nav className="fixed w-full z-50 top-0 left-0 bg-white/80 dark:bg-bg-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -175,7 +211,11 @@ const App: React.FC = () => {
             </div>
             <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white">نظام المصمم المحترف !</span>
           </div>
-          <ThemeToggle />
+          
+          <div className="flex items-center gap-4">
+            <Changelog />
+            <ThemeToggle />
+          </div>
         </div>
       </nav>
 
@@ -192,10 +232,7 @@ const App: React.FC = () => {
             </div>
             
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.15] font-black mb-6 text-gray-900 dark:text-white animate-fade-in-up [animation-delay:0.2s]">
-              توقف عن جمع <span className="text-primary italic">'الكورسات'</span>
-              <br className="hidden sm:block" /> 
-              <span className="sm:inline"> وابدأ بجمع </span>
-              <span className="gradient-text italic">'العملاء'</span>
+              توقف عن جمع <span className="text-primary">الكورسات</span><br className="sm:hidden" /> وابدأ بجمع <span className="gradient-text">العملاء</span>
             </h1>
             
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 dark:text-gray-400 leading-relaxed font-medium mb-10 max-w-2xl mx-auto px-2 animate-fade-in-up [animation-delay:0.4s]">
@@ -204,7 +241,7 @@ const App: React.FC = () => {
 
             <button 
               onClick={openWhatsApp}
-              className="bg-primary hover:bg-primary/90 text-white text-sm sm:text-base font-black px-8 py-4 rounded-2xl shadow-xl shadow-primary/20 transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2 mx-auto animate-fade-in-up [animation-delay:0.6s]"
+              className="bg-primary hover:bg-primary/90 text-white text-sm sm:text-base font-black px-6 sm:px-8 py-4 rounded-2xl shadow-xl shadow-primary/20 transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2 mx-auto animate-fade-in-up [animation-delay:0.6s]"
             >
               <span className="material-icons-round text-xl animate-bounce">rocket_launch</span>
               تواصل معي واتساب
@@ -216,7 +253,7 @@ const App: React.FC = () => {
         <section id="tools-section" className="mb-28 reveal-on-scroll scroll-mt-24">
           <div className="text-center mb-16">
             <h2 className="text-2xl md:text-4xl font-black text-gray-900 dark:text-white mb-4">الأدوات التي سنحترفها سوياً</h2>
-            <p className="text-sm md:text-lg text-gray-500 dark:text-gray-400">سوف ندمج قوة التصميم مع ذكاء الآلة لنتائج مبهرة.</p>
+            <p className="text-sm md:text-lg text-gray-500 dark:text-gray-400">سوف ندمج قوة التصميم مع <span className="font-bold text-primary">الذكاء الاصطناعي</span> لنتائج مبهرة.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {TOOLS.map((tool, i) => (
@@ -234,6 +271,44 @@ const App: React.FC = () => {
           </div>
         </section>
 
+        {/* وصف يوسف - Mentor Section */}
+        <section id="mentor-section" className="mb-32 overflow-hidden scroll-mt-24">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20">
+              <div className="w-full md:w-1/2 flex justify-center reveal-left">
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-primary/20 rounded-[2.5rem] rotate-6 group-hover:rotate-3 transition-transform duration-500 -z-10"></div>
+                  <div className="absolute inset-0 bg-secondary/10 rounded-[2.5rem] -rotate-6 group-hover:-rotate-3 transition-transform duration-500 -z-10"></div>
+                  
+                  <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-[2.5rem] border-4 border-white dark:border-surface-dark shadow-2xl overflow-hidden ring-4 ring-secondary/20 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center">
+                    <div className="flex flex-col items-center text-gray-300 dark:text-slate-700">
+                      <span className="material-icons-round text-8xl md:text-9xl">account_circle</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-full md:w-1/2 text-right reveal-right">
+                <div className="inline-block px-4 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-black mb-4">
+                  مؤسس البرنامج
+                </div>
+                <h2 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-6">يوسف أيمن</h2>
+                
+                <p className="text-lg md:text-xl font-bold text-primary leading-tight mb-8 relative">
+                  <span className="material-icons-round absolute -right-8 -top-4 opacity-10 text-6xl pointer-events-none">format_quote</span>
+                  "أنا لا أعلمك كيف تحرك 'الماوس'.. أنا أعلمك كيف تحرك 'السوق'."
+                </p>
+                
+                <div className="space-y-4 text-gray-600 dark:text-gray-400 text-sm md:text-base leading-relaxed">
+                  <p>مدرب محترف ساهمت في تغيير حياة أكثر من 350 شخص وساعدتهم لإحتراف التصميم عبر منصة كانفا وحصولهم على مصدر دخل من الإنترنت.</p>
+                  <p>خبرتي امتدت لسنوات فقدمت خدمات في التصميم والتسويق لمختلف العملاء من شركات وعلامات تجارية كبرى.</p>
+                  <p className="font-bold text-gray-900 dark:text-white border-t border-gray-100 dark:border-gray-800 pt-4">مهمتي واحدة: أن أجعل مهاراتك تدفع فواتيرك.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Methodology Section */}
         <section id="methodology-section" className="relative mb-28 scroll-mt-24 reveal-on-scroll">
           <div className="mb-14 text-center max-w-2xl mx-auto">
@@ -241,7 +316,7 @@ const App: React.FC = () => {
             <p className="text-sm md:text-lg text-gray-500 dark:text-gray-400">ثلاث مراحل مدروسة بعناية لإيصالك للاحتراف الحقيقي في سوق العمل.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             {STEPS.map((step, idx) => (
               <div 
                 key={step.id} 
@@ -255,6 +330,16 @@ const App: React.FC = () => {
                 <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{step.description}</p>
               </div>
             ))}
+          </div>
+
+          <div className="text-center mt-10 reveal-on-scroll">
+             <button 
+              onClick={openWhatsApp}
+              className="inline-flex items-center justify-center gap-3 bg-primary hover:bg-primary/90 text-white font-black px-6 sm:px-8 py-4 rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 group"
+            >
+              <span className="material-icons-round text-2xl group-hover:rotate-12 transition-transform">whatsapp</span>
+              <span className="text-base">احجز مقعدك الآن</span>
+            </button>
           </div>
         </section>
 
@@ -335,16 +420,14 @@ const App: React.FC = () => {
             ))}
           </div>
 
-          {/* Call to Action under Testimonials */}
           <div className="mt-16 text-center reveal-on-scroll">
             <button 
               onClick={openWhatsApp}
-              className="inline-flex items-center justify-center gap-2 md:gap-3 bg-[#25D366] hover:bg-[#20ba5a] text-white font-black px-6 py-4 md:px-12 md:py-5 rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl shadow-green-500/30 transition-all hover:scale-105 active:scale-95 group mx-auto"
+              className="inline-flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#20ba5a] text-white font-black px-5 sm:px-10 py-4 sm:py-5 rounded-2xl shadow-xl shadow-green-500/30 transition-all hover:scale-105 active:scale-95 group mx-auto max-w-[90%] sm:max-w-max"
             >
-              <span className="material-icons-round text-2xl md:text-3xl group-hover:rotate-12 transition-transform">whatsapp</span>
-              <span className="text-sm md:text-lg">تواصل معي مباشرة عبر واتساب</span>
+              <span className="material-icons-round text-2xl sm:text-3xl transition-transform group-hover:rotate-12">whatsapp</span>
+              <span className="text-sm sm:text-lg">تواصل معي مباشر عبر الواتساب</span>
             </button>
-            <p className="mt-4 text-[10px] md:text-xs text-gray-500 dark:text-gray-400 font-bold">لدي سؤال أو استفسار سريع؟ أنا هنا لمساعدتك.</p>
           </div>
         </section>
 
@@ -393,14 +476,15 @@ const App: React.FC = () => {
               <div className="animate-reveal">
                 <h2 className="text-3xl md:text-5xl font-black mb-6">جاهز لبناء نظامك الخاص؟</h2>
                 <p className="text-sm md:text-lg opacity-90 mb-10 max-w-lg mx-auto">المقاعد محدودة جداً لأن كل طالب يحصل على توجيه فردي كامل. سجل اهتمامك الآن.</p>
-                <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3">
+                <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3 mb-8">
                   <input 
                     type="email" 
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="أدخل بريدك الإلكتروني"
-                    className="flex-1 px-6 py-4 rounded-2xl bg-white/10 border border-white/20 focus:bg-white/20 outline-none text-white placeholder:text-white/60 backdrop-blur-sm transition-all"
+                    className="flex-1 px-6 py-4 rounded-2xl bg-white/10 border border-white/20 focus:bg-white/20 outline-none text-white placeholder:text-white/60 backdrop-blur-sm transition-all text-right"
+                    dir="rtl"
                   />
                   <button 
                     type="submit"
@@ -409,13 +493,28 @@ const App: React.FC = () => {
                     متابعة التسجيل
                   </button>
                 </form>
+
+                {/* Socials Contact Section */}
+                <div className="pt-8 border-t border-white/10 flex flex-col items-center gap-4">
+                   <p className="text-xs font-bold opacity-70 uppercase tracking-widest">طرق أخرى للتواصل السريع</p>
+                   <div className="flex items-center gap-6">
+                      <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all hover:scale-110 active:scale-95" title="LinkedIn">
+                        <span className="material-icons-round">verified</span>
+                      </a>
+                      <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all hover:scale-110 active:scale-95" title="Instagram">
+                         <span className="material-icons-round">camera_alt</span>
+                      </a>
+                      <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all hover:scale-110 active:scale-95" title="WhatsApp">
+                         <span className="material-icons-round">chat</span>
+                      </a>
+                   </div>
+                </div>
               </div>
             )}
 
             {joinStep === 'options' && (
               <div className="animate-reveal">
                 <h2 className="text-2xl md:text-4xl font-black mb-4">ما هو هدفك من التواصل؟</h2>
-                <p className="text-sm opacity-90 mb-10">بمجرد الاختيار، سنقوم بفتح صفحة بريد جديدة معبأة بالبيانات</p>
                 <div className="grid grid-cols-1 gap-3 text-right">
                   {[
                     "ارغب في الانضمام للبرنامج",
@@ -436,14 +535,6 @@ const App: React.FC = () => {
                     </button>
                   ))}
                 </div>
-                
-                <button 
-                  type="button"
-                  onClick={() => setJoinStep('input')}
-                  className="mt-6 text-white/60 hover:text-white text-xs underline"
-                >
-                  العودة لتعديل البريد
-                </button>
               </div>
             )}
 
@@ -453,31 +544,6 @@ const App: React.FC = () => {
                   <span className="material-icons-round text-5xl">auto_awesome</span>
                 </div>
                 <h2 className="text-2xl md:text-4xl font-black mb-4">تم تجهيز الطلب بنجاح!</h2>
-                <div className="bg-white/10 p-6 rounded-3xl border border-white/20 backdrop-blur-md mb-8">
-                  <p className="text-base md:text-lg mb-4">
-                    لقد قمنا بفتح نافذة بريد جديدة لإرسال طلبك بخصوص: <b>{selectedOption}</b>
-                  </p>
-                  
-                  <div className="bg-white/20 p-4 rounded-2xl text-sm mb-6 border border-white/20 text-right">
-                    <p className="font-bold mb-2">يرجى التحقق من تبويبات المتصفح أو تطبيق البريد لديك:</p>
-                    <ul className="list-disc list-inside space-y-1 opacity-90 inline-block text-right">
-                      <li>تم تعبئة المستلم: {RECIPIENT}</li>
-                      <li>تم تعبئة العنوان والمحتوى تلقائياً</li>
-                      <li>فقط اضغط على "إرسال" (Send) لتصلنا رسالتك</li>
-                    </ul>
-                  </div>
-
-                  <div className="space-y-3">
-                    <p className="text-xs opacity-70">إذا لم يفتح التبويب تلقائياً، اضغط على الزر أدناه:</p>
-                    <a 
-                      href={`mailto:${RECIPIENT}?subject=${encodeURIComponent(`🚀 طلب تسجيل جديد: ${selectedOption}`)}&body=${encodeURIComponent(`مرحباً أ. يوسف،\n\nأرغب في التواصل معك بخصوص الخيار الذي اخترته: [${selectedOption}]\n\nبريدي الإلكتروني للمتابعة: ${email}\n\nشكراً لك.`)}`}
-                      className="inline-block bg-white text-primary px-8 py-3 rounded-xl text-sm font-black transition-all hover:scale-105 active:scale-95 shadow-md"
-                    >
-                      📩 إرسال الطلب يدوياً الآن
-                    </a>
-                  </div>
-                </div>
-                
                 <button 
                   type="button"
                   onClick={resetForm}
@@ -488,33 +554,10 @@ const App: React.FC = () => {
                 </button>
               </div>
             )}
-
-            {joinStep !== 'success' && (
-              <>
-                <div className="flex items-center gap-4 py-8 opacity-60 reveal-on-scroll">
-                  <div className="h-px bg-white flex-1"></div>
-                  <span className="text-xs font-bold">طرق تواصل أخرى</span>
-                  <div className="h-px bg-white flex-1"></div>
-                </div>
-
-                {/* Fixed WhatsApp Button in Join Section */}
-                <button 
-                  type="button"
-                  onClick={openWhatsApp}
-                  className="w-full bg-white text-primary font-black px-6 py-4 md:px-8 md:py-5 rounded-2xl hover:bg-gray-100 transition-all shadow-xl flex items-center justify-center gap-3 md:gap-4 active:scale-95 reveal-on-scroll group overflow-hidden relative"
-                >
-                  <div className="w-10 h-10 bg-[#25D366] rounded-xl flex items-center justify-center text-white shadow-lg shadow-green-500/20 group-hover:rotate-12 transition-transform shrink-0">
-                    <span className="material-icons-round text-2xl">whatsapp</span>
-                  </div>
-                  <span className="text-base md:text-lg">تواصل مباشر عبر واتساب</span>
-                </button>
-              </>
-            )}
           </div>
         </section>
       </main>
 
-      {/* Footer */}
       <footer className="bg-white dark:bg-surface-dark border-t border-gray-100 dark:border-gray-800 py-12 px-6 reveal-on-scroll">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-2 group cursor-pointer" onClick={openWhatsApp}>
@@ -523,15 +566,21 @@ const App: React.FC = () => {
             </div>
             <span className="font-bold text-lg text-gray-900 dark:text-white">نظام المصمم المحترف</span>
           </div>
-          
-          <div className="flex flex-wrap justify-center gap-6">
-             <button onClick={openWhatsApp} className="text-gray-400 hover:text-primary transition-colors hover:scale-110 transform">تويتر (X)</button>
-             <button onClick={openWhatsApp} className="text-gray-400 hover:text-primary transition-colors hover:scale-110 transform">إنستغرام</button>
-             <button onClick={openWhatsApp} className="text-gray-400 hover:text-primary transition-colors hover:scale-110 transform">لينكدإن</button>
-             <button onClick={openWhatsApp} className="text-gray-400 hover:text-primary transition-colors hover:scale-110 transform">تيك توك</button>
+
+          <div className="flex flex-col items-center md:items-end gap-3">
+             <p className="text-sm text-gray-500 dark:text-gray-400">© 2024 جميع الحقوق محفوظة للنظام التدريبي.</p>
+             <div className="flex items-center gap-4">
+                <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-600 transition-colors">
+                  <span className="material-icons-round">verified</span>
+                </a>
+                <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-pink-600 transition-colors">
+                   <span className="material-icons-round">camera_alt</span>
+                </a>
+                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-green-500 transition-colors">
+                   <span className="material-icons-round">chat</span>
+                </a>
+             </div>
           </div>
-          
-          <p className="text-sm text-gray-500 dark:text-gray-400">© 2024 جميع الحقوق محفوظة للنظام التدريبي.</p>
         </div>
       </footer>
 

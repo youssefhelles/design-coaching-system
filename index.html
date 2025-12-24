@@ -84,6 +84,26 @@
         opacity: 1;
         transform: translateY(0);
       }
+
+      /* حركات جانبية خاصة بقسم وصف يوسف */
+      .reveal-left {
+        opacity: 0;
+        transform: translateX(-50px);
+        transition: all 1s cubic-bezier(0.21, 1.02, 0.73, 1);
+      }
+      .reveal-left.active {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .reveal-right {
+        opacity: 0;
+        transform: translateX(50px);
+        transition: all 1s cubic-bezier(0.21, 1.02, 0.73, 1);
+      }
+      .reveal-right.active {
+        opacity: 1;
+        transform: translateX(0);
+      }
       
       .hover-lift {
         transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
@@ -108,7 +128,6 @@
 </head>
   <body class="bg-bg-light dark:bg-bg-dark text-slate-900 dark:text-slate-100 transition-colors duration-300">
     <div id="root"></div>
-    <!-- Vite سيقوم بمعالجة هذا الملف وتحويله تلقائياً -->
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>

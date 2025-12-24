@@ -113,7 +113,7 @@ export const FAQS = [
     answer: "تستطيع ان تتطبق جميع دروس الدورة الفردية باستخدام الجوال ولكن نفضل <strong class='font-black text-gray-900 dark:text-white'>ان يكون لديك لابتوب</strong> او حتى ايباد لتحقيق سلاسة في الشرح."
   },
   {
-    question: "هل أحتاج لخبرة سابقة في التصميم؟",
+    question: "هل أحتاج لخبرة سابقة في التصميم? ",
     answer: "لا نهائياً. البرنامج مصمم ليأخذك من الصفر أو من مستوى الهواية إلى الاحتراف التجاري."
   },
   {
@@ -129,12 +129,27 @@ export const TESTIMONIALS: Testimonial[] = [
     text: "خذيت دورات وايد من قبل، بس اللي صج لقيته مميز عندك إنك ما بخلت علي بالمعلومة.. حشيت مخي حشو بالمعلومات وعطيتني كل شيء بعكس الدورات اللي كانت تعطيني بالقطاره.",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=SarahLine",
     instagram: "https://www.instagram.com/sarah.line.kw/",
-    audioUrl: "https://raw.githubusercontent.com/youssef-ayman/assets/main/testimonial_sarah.mp3"
+    audioUrl: "https://docs.google.com/uc?export=download&id=15IgxGFgGSB3fMS2qEo59XmInHaC2Wetr"
   },
   {
     name: "محمد خالد",
     role: "صانع محتوى",
     text: "نظام القوالب الذي بنيناه سوياً وفر علي ساعات من العمل الأسبوعي. هويتي البصرية أصبحت ثابتة واحترافية.",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mohamed"
+  }
+];
+
+export const CHANGELOG = [
+  {
+    type: 'New',
+    title: 'زيادة عدد ورش العمل',
+    description: 'يمكن الآن للمشتركين الحصول على أكثر من 6 ورش عمل تدريبية حسب حاجتهم ومستوى تقدمهم لضمان أقصى استفادة.',
+    date: 'ديسمبر 2025'
+  },
+  {
+    type: 'Upcoming',
+    title: 'تحديثات كثيرة قريباً',
+    description: 'نعمل حالياً على تطوير مميزات جديدة لنظام المصمم المحترف ستنطلق تباعاً.',
+    date: 'قريباً'
   }
 ];
