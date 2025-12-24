@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import ThemeToggle from './components/ThemeToggle';
 import FloatingNav from './components/FloatingNav';
 import { STEPS, TRACKS, TIMELINE, FAQS, TESTIMONIALS, TOOLS } from './constants';
-import { Testimonial } from './types';
 
 const FAQItem: React.FC<{ faq: { question: string, answer: string }, isOpen: boolean, onToggle: () => void }> = ({ faq, isOpen, onToggle }) => {
   return (
