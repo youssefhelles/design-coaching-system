@@ -148,8 +148,30 @@ const App: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [timelineProgress, setTimelineProgress] = useState(0);
+  const timelineRef = useRef<HTMLDivElement>(null);
 
   useRevealOnScroll();
+
+  useEffect(() => {
+    const updateTimelineProgress = () => {
+      if (timelineRef.current) {
+        const rect = timelineRef.current.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        
+        // Calculate progress based on where the timeline container is relative to the center of the viewport
+        const start = rect.top;
+        const height = rect.height;
+        const progress = Math.max(0, Math.min(1, (windowHeight / 2 - start) / height));
+        
+        setTimelineProgress(progress);
+      }
+    };
+
+    window.addEventListener('scroll', updateTimelineProgress);
+    updateTimelineProgress(); // Check on mount
+    return () => window.removeEventListener('scroll', updateTimelineProgress);
+  }, []);
 
   const RECIPIENT = "ye444sf@gmail.com";
   const WHATSAPP_URL = 'https://wa.me/972597713882';
@@ -423,10 +445,10 @@ const App: React.FC = () => {
           <div className="mt-16 text-center reveal-on-scroll">
             <button 
               onClick={openWhatsApp}
-              className="inline-flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#20ba5a] text-white font-black px-5 sm:px-10 py-4 sm:py-5 rounded-2xl shadow-xl shadow-green-500/30 transition-all hover:scale-105 active:scale-95 group mx-auto max-w-[90%] sm:max-w-max"
+              className="inline-flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#20ba5a] text-white font-black px-5 sm:px-8 py-3 sm:py-3.5 rounded-2xl shadow-xl shadow-green-500/30 transition-all hover:scale-105 active:scale-95 group mx-auto max-w-[90%] sm:max-w-max"
             >
-              <span className="material-icons-round text-2xl sm:text-3xl transition-transform group-hover:rotate-12">whatsapp</span>
-              <span className="text-sm sm:text-lg">تواصل معي مباشر عبر الواتساب</span>
+              <span className="material-icons-round text-2xl sm:text-3xl transition-transform group-hover:rotate-12 flex items-center">whatsapp</span>
+              <span className="text-sm sm:text-lg leading-none flex items-center h-full">تواصل معي مباشر عبر الواتساب</span>
             </button>
           </div>
         </section>
@@ -435,10 +457,16 @@ const App: React.FC = () => {
         <section id="timeline-section" className="mb-28 scroll-mt-24 reveal-on-scroll">
           <div className="max-w-2xl mx-auto">
             <h2 className="text-2xl md:text-4xl font-black text-gray-900 dark:text-white mb-12 text-center">الخطة الزمنية (21 يوماً)</h2>
-            <div className="relative border-r-2 border-dashed border-gray-200 dark:border-gray-800 mr-4 space-y-10">
+            <div ref={timelineRef} className="relative border-r-2 border-dashed border-gray-200 dark:border-gray-800 mr-4 space-y-10">
+              {/* Progress Line Overlay */}
+              <div 
+                className="absolute right-[-2px] top-0 w-[2px] bg-primary transition-all duration-300 ease-out z-10"
+                style={{ height: `${timelineProgress * 100}%` }}
+              ></div>
+              
               {TIMELINE.map((step, idx) => (
                 <div key={step.id} className="relative pr-10 group" style={{ transitionDelay: `${idx * 200}ms` }}>
-                  <div className="absolute -right-[9px] top-0 w-4 h-4 rounded-full bg-primary ring-4 ring-primary/10 transition-transform group-hover:scale-150 duration-500"></div>
+                  <div className={`absolute -right-[9px] top-0 w-4 h-4 rounded-full transition-all duration-500 ring-4 z-20 ${timelineProgress > (idx / (TIMELINE.length - 1)) ? 'bg-primary ring-primary/20 scale-125' : 'bg-gray-300 dark:bg-gray-700 ring-transparent group-hover:bg-primary'}`}></div>
                   <div className="bg-white dark:bg-surface-dark p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm transition-all group-hover:border-primary group-hover:shadow-lg">
                     <h3 className="font-black text-primary text-base mb-2">{step.week}</h3>
                     <p className="text-gray-700 dark:text-gray-300 text-sm md:text-base font-medium leading-relaxed">{step.detail}</p>
