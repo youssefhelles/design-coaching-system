@@ -180,6 +180,15 @@ const App: React.FC = () => {
     return () => window.removeEventListener('scroll', updateTimelineProgress);
   }, []);
 
+  // Prevent background scroll when modal is open
+  useEffect(() => {
+    if (expandedStep) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [expandedStep]);
+
   const RECIPIENT = "ye444sf@gmail.com";
   const WHATSAPP_URL = 'https://wa.me/972597713882';
   const INSTAGRAM_URL = 'https://www.instagram.com/youssefaymanc/';
@@ -400,7 +409,10 @@ const App: React.FC = () => {
           </div>
 
           {expandedStep && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm animate-fade-in">
+            <div 
+              className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-slate-900/20 dark:bg-slate-900/40 backdrop-blur-2xl animate-fade-in"
+              onClick={() => setExpandedStep(null)}
+            >
               <div 
                 className="bg-white dark:bg-surface-dark w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden animate-reveal relative border border-gray-100 dark:border-gray-800"
                 onClick={(e) => e.stopPropagation()}
@@ -441,7 +453,6 @@ const App: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="absolute inset-0 -z-10" onClick={() => setExpandedStep(null)}></div>
             </div>
           )}
 
@@ -661,7 +672,7 @@ const App: React.FC = () => {
                     <div 
                       key={idx} 
                       className="flex items-start gap-3 p-3 bg-white/10 rounded-xl border border-white/5 hover:bg-white/15 transition-all animate-reveal group"
-                      style={{ animationDelay: `${idx * 100}ms` }}
+                      style={{ animationDelay: `${point === LEARNING_POINTS[0] ? 0 : idx * 100}ms` }}
                     >
                       <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-secondary group-hover:scale-110 transition-all duration-300">
                         <span className="material-icons-round text-white text-sm">check</span>
