@@ -6,7 +6,8 @@ export const STEPS: Step[] = [
     id: 1,
     phase: 'المرحلة الأولى',
     title: 'هندسة الأساس',
-    description: 'تفكيك وإعادة بناء فهمك للتصميم. نركز هنا على القواعد الأكاديمية، سيكولوجية المستخدم، وأدوات التصميم المتقدمة لضمان أساس متين لا يهتز.',
+    description: 'تفكيك وإعادة بناء فهمك للتصميم. نركز هنا على القواعد الأكاديمية وسيكولوجية المستخدم.',
+    longDescription: 'الآن في كثير دورات تقدم التصميم عن طريق كانفا ولكن مشكلتها، اما <span class="font-black text-primary underline decoration-primary/30">قديمة</span>؟ او فقط تعلمك <span class="font-black text-gray-900 dark:text-white">الادوات</span> في كانفا، وهذه تحدي كبير، انت تحتاج مو بس تعرف الادوات، كمان تعرف <span class="font-black text-primary">كيف تستخدمها</span> في تصميمك ومتى تسخدم الاداة او التطبيق الموجود في كانفا بالشكل الصحيح.',
     icon: 'architecture',
     iconColor: 'text-primary'
   },
@@ -14,7 +15,8 @@ export const STEPS: Step[] = [
     id: 2,
     phase: 'المرحلة الثانية',
     title: 'محاكاة السوق',
-    description: 'وداعاً للمشاريع الوهمية. ستعمل على مشاريع تحاكي طلبات السوق الحالية، تتعلم كيفية التعامل مع العملاء، إدارة التوقعات، وتسليم ملفات احترافية.',
+    description: 'وداعاً للمشاريع الوهمية. ستعمل على مشاريع تحاكي طلبات السوق الحالية والعملاء.',
+    longDescription: 'بعد ما تتعلم كيف تصمم وكيف تسوي منشورات اعلانية وعروض تقديمية، الآن دورنا امشي معك <span class="font-black text-blue-500">خطوة بخطوة</span>، كيف <span class="font-black text-gray-900 dark:text-white">تسوق لنفسك</span> كمصمم؟ كيف تحصل على <span class="font-black text-blue-500">عملاء</span>؟ وكيف تعمل لنفسك <span class="font-black text-gray-900 dark:text-white">ملف اعمال احترافي</span>، خطوة بخطوة همشي معك باذن الله لتبني سمعتك في السوق.',
     icon: 'science',
     iconColor: 'text-blue-500'
   },
@@ -22,7 +24,8 @@ export const STEPS: Step[] = [
     id: 3,
     phase: 'المرحلة الثالثة',
     title: 'نظام الدخل',
-    description: 'كيف تحول المهارة إلى مال. استراتيجيات التسعير، التفاوض، وبناء معرض أعمال يجذب العملاء ذوي الميزانيات العالية (High-Ticket Clients).',
+    description: 'كيف تحول المهارة إلى مال. استراتيجيات التسعير والتفاوض وبناء الولاء.',
+    longDescription: '<span class="font-black text-green-600">المرحلة الثالثة</span> لتحقيق اكبر فائدة وكيف تتعامل مع العميل، كيف <span class="font-black text-gray-900 dark:text-white">تسعر خدماتك</span>؟ كيف تحط سعر ما يظلمك كمصمم؟ وكيف ايضًا تخلي العميل نفسه يسوق لك <span class="font-black text-green-600">"تسويق شبكي"</span> وكثير من التفاصيل هنا مركزة على <span class="font-black text-gray-900 dark:text-white">التعامل مع العميل</span>، كل هذه الخبرة اكتسبتها خلال <span class="font-black text-green-600">سنوات طويلة</span> في العمل.',
     icon: 'monetization_on',
     iconColor: 'text-green-500'
   }
@@ -128,23 +131,28 @@ export const TESTIMONIALS: Testimonial[] = [
     role: "مصممة وباحثة جمال",
     text: "خذيت دورات وايد من قبل، بس اللي صج لقيته مميز عندك إنك ما بخلت علي بالمعلومة.. حشيت مخي حشو بالمعلومات وعطيتني كل شيء بعكس الدورات اللي كانت تعطيني بالقطاره.",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=SarahLine",
-    instagram: "https://www.instagram.com/sarah.line.kw/",
-    audioUrl: "https://docs.google.com/uc?export=download&id=15IgxGFgGSB3fMS2qEo59XmInHaC2Wetr"
+    instagram: "https://www.instagram.com/sarah.line.kw/"
   },
   {
-    name: "محمد خالد",
-    role: "صانع محتوى",
-    text: "نظام القوالب الذي بنيناه سوياً وفر علي ساعات من العمل الأسبوعي. هويتي البصرية أصبحت ثابتة واحترافية.",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mohamed"
+    name: "عائشة",
+    role: "صاحبة مشروع",
+    text: "التدريب الفردي معك جدا افادني في التصميم وكمان في التسويق و شاركتني معلومات إضافية عن التسويق حتفيدني مستقبلا في مشروعي وكمان الشي الجميل لما بلغتني عن تحديثات كانفا الجديدة",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Aisha",
   }
 ];
 
 export const CHANGELOG = [
   {
     type: 'New',
+    title: 'إمكانية عمل صفحة هبوط لك احترافية',
+    description: 'أقدم الآن تصميم صفحة هبوط مثل التي تراها الآن بسعر مناسب جداً لأني أستخدم أدوات الذكاء الاصطناعي في عمل المواقع.',
+    date: 'يناير 2026'
+  },
+  {
+    type: 'New',
     title: 'زيادة عدد ورش العمل',
     description: 'يمكن الآن للمشتركين الحصول على أكثر من 6 ورش عمل تدريبية حسب حاجتهم ومستوى تقدمهم لضمان أقصى استفادة.',
-    date: 'ديسمبر 2025'
+    date: 'ديسمبر 2024'
   },
   {
     type: 'Upcoming',
@@ -152,4 +160,14 @@ export const CHANGELOG = [
     description: 'نعمل حالياً على تطوير مميزات جديدة لنظام المصمم المحترف ستنطلق تباعاً لتعزيز تجربتكم التدريبية.',
     date: 'قريباً'
   }
+];
+
+export const LEARNING_POINTS = [
+  "6 ورش مباشرة",
+  "أكثر من 20 يوم متابعة",
+  "عمل نماذج واقعية والإشراف عليها",
+  "تقديم ملاحظات وتعديلات",
+  "التعرف والاستكشاف في أكثر من 5 مواقع للتصميم",
+  "كتابة أوامر احترافية للذكاء الاصطناعي",
+  "والكثير من المفاجآت!"
 ];

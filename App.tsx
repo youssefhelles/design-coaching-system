@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import ThemeToggle from './components/ThemeToggle';
 import FloatingNav from './components/FloatingNav';
 import Changelog from './components/Changelog';
-import { STEPS, TRACKS, TIMELINE, FAQS, TESTIMONIALS, TOOLS } from './constants';
+import { STEPS, TRACKS, TIMELINE, FAQS, TESTIMONIALS, TOOLS, LEARNING_POINTS } from './constants';
+import { Step } from './types';
 
 const getMailData = (option: string, email: string) => {
   return {
@@ -64,6 +65,8 @@ const AudioPlayer: React.FC<{ src: string }> = ({ src }) => {
       } else {
         setIsLoading(true);
         setHasError(false);
+        // Ensure the audio source is properly loaded before playing
+        audioRef.current.load();
         audioRef.current.play().then(() => {
           setIsPlaying(true);
           setIsLoading(false);
@@ -78,46 +81,49 @@ const AudioPlayer: React.FC<{ src: string }> = ({ src }) => {
   };
 
   return (
-    <div className={`mt-4 flex flex-col gap-2 p-3 rounded-2xl border transition-colors ${hasError ? 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800' : 'bg-primary/5 dark:bg-primary/10 border-primary/10'}`}>
+    <div className={`mt-4 flex flex-col gap-2 p-3 rounded-2xl border transition-all ${hasError ? 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800 scale-[0.98]' : 'bg-primary/5 dark:bg-primary/10 border-primary/10 hover:border-primary/30 shadow-sm'}`}>
       <div className="flex items-center gap-3">
         <audio 
           ref={audioRef} 
           src={src} 
-          preload="none"
+          preload="auto"
           onEnded={() => setIsPlaying(false)} 
           onPlaying={() => { setIsLoading(false); setIsPlaying(true); }}
+          onWaiting={() => setIsLoading(true)}
+          onCanPlay={() => setIsLoading(false)}
           onError={() => { setHasError(true); setIsLoading(false); }}
         />
         <button 
           onClick={togglePlay}
           disabled={isLoading}
-          className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95 disabled:opacity-50 ${hasError ? 'bg-gray-400 text-white' : 'bg-primary text-white shadow-primary/20 hover:scale-105'}`}
+          className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95 disabled:opacity-50 ${hasError ? 'bg-gray-400 text-white' : 'bg-primary text-white shadow-primary/20 hover:scale-105'}`}
         >
           {isLoading ? (
             <span className="material-icons-round animate-spin">sync</span>
           ) : (
-            <span className="material-icons-round">{isPlaying ? 'pause' : 'play_arrow'}</span>
+            <span className="material-icons-round text-2xl">{isPlaying ? 'pause' : 'play_arrow'}</span>
           )}
         </button>
         <div className="flex-1">
-          <div className="text-[10px] font-bold text-primary mb-1 uppercase tracking-wider">
-            {isLoading ? 'جاري التحميل...' : hasError ? 'عذراً، تعذر التشغيل المباشر' : 'استمع إلى رأي العميلة'}
+          <div className="text-[10px] font-bold text-primary mb-1 uppercase tracking-wider flex items-center gap-1">
+            {isLoading && <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>}
+            {isLoading ? 'جاري التوصيل والمزامنة...' : hasError ? 'عذراً، هناك مشكلة في تشغيل المقطع' : 'استمع إلى رأي العميلة (تسجيل صوتي)'}
           </div>
           {!hasError ? (
-            <div className="flex gap-0.5 items-end h-4">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+            <div className="flex gap-0.5 items-end h-5">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((i) => (
                 <div 
                   key={i} 
-                  className={`w-1 bg-primary rounded-full transition-all duration-300 ${isPlaying && !isLoading ? 'animate-pulse' : 'h-1 opacity-30'}`}
+                  className={`w-1 bg-primary rounded-full transition-all duration-300 ${isPlaying && !isLoading ? 'animate-pulse' : 'h-1 opacity-20'}`}
                   style={{ 
-                    height: isPlaying && !isLoading ? `${20 + Math.random() * 80}%` : '4px',
-                    animationDelay: `${i * 0.1}s` 
+                    height: isPlaying && !isLoading ? `${30 + Math.random() * 70}%` : '4px',
+                    animationDelay: `${i * 0.05}s` 
                   }}
                 ></div>
               ))}
             </div>
           ) : (
-            <div className="text-[10px] text-red-500 font-medium">يرجى استخدام الرابط المباشر أدناه</div>
+            <div className="text-[10px] text-red-500 font-medium">يرجى المحاولة لاحقاً أو التأكد من اتصالك</div>
           )}
         </div>
       </div>
@@ -149,6 +155,8 @@ const App: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [timelineProgress, setTimelineProgress] = useState(0);
+  const [expandedStep, setExpandedStep] = useState<Step | null>(null);
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
   const timelineRef = useRef<HTMLDivElement>(null);
 
   useRevealOnScroll();
@@ -159,7 +167,6 @@ const App: React.FC = () => {
         const rect = timelineRef.current.getBoundingClientRect();
         const windowHeight = window.innerHeight;
         
-        // Calculate progress based on where the timeline container is relative to the center of the viewport
         const start = rect.top;
         const height = rect.height;
         const progress = Math.max(0, Math.min(1, (windowHeight / 2 - start) / height));
@@ -169,7 +176,7 @@ const App: React.FC = () => {
     };
 
     window.addEventListener('scroll', updateTimelineProgress);
-    updateTimelineProgress(); // Check on mount
+    updateTimelineProgress();
     return () => window.removeEventListener('scroll', updateTimelineProgress);
   }, []);
 
@@ -222,12 +229,32 @@ const App: React.FC = () => {
     window.open(WHATSAPP_URL, '_blank');
   };
 
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (id === 'hero-section') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const nextTestimonial = () => {
+    setTestimonialIndex((prev) => (prev + 1) % TESTIMONIALS.length);
+  };
+
+  const prevTestimonial = () => {
+    setTestimonialIndex((prev) => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
+  };
+
   return (
     <div className="min-h-screen bg-bg-light dark:bg-bg-dark transition-colors duration-300 font-sans text-right" dir="rtl">
       {/* Navigation */}
       <nav className="fixed w-full z-50 top-0 left-0 bg-white/80 dark:bg-bg-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 animate-fade-in-up group cursor-pointer" onClick={openWhatsApp}>
+          <div 
+            className="flex items-center gap-2 animate-fade-in-up group cursor-pointer" 
+            onClick={() => scrollToSection('hero-section')}
+          >
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20 group-hover:rotate-[360deg] transition-transform duration-700">
               <span className="material-icons-round text-white text-xl">layers</span>
             </div>
@@ -293,7 +320,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* وصف يوسف - Mentor Section */}
+        {/* Mentor Section */}
         <section id="mentor-section" className="mb-32 overflow-hidden scroll-mt-24">
           <div className="max-w-6xl mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20">
@@ -338,21 +365,85 @@ const App: React.FC = () => {
             <p className="text-sm md:text-lg text-gray-500 dark:text-gray-400">ثلاث مراحل مدروسة بعناية لإيصالك للاحتراف الحقيقي في سوق العمل.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             {STEPS.map((step, idx) => (
               <div 
                 key={step.id} 
-                className="bg-white dark:bg-surface-dark p-8 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm hover-lift group"
-                style={{ transitionDelay: `${idx * 100}ms` }}
+                className="relative bg-white/80 dark:bg-surface-dark/80 backdrop-blur-md p-8 pt-12 rounded-[2.5rem] border border-gray-200/50 dark:border-gray-700/30 shadow-xl shadow-primary/5 hover-lift group overflow-hidden cursor-pointer"
+                onClick={() => setExpandedStep(step)}
+                style={{ transitionDelay: `${idx * 150}ms` }}
               >
-                <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-all duration-500">
-                  <span className={`material-icons-round ${step.iconColor} text-2xl group-hover:text-white`}>{step.icon}</span>
+                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${idx === 0 ? 'from-primary/20' : idx === 1 ? 'from-blue-500/20' : 'from-green-500/20'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-2xl -z-10`}></div>
+                
+                <div className="absolute top-6 left-8 bg-primary/10 text-primary text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-primary/10 group-hover:bg-primary group-hover:text-white transition-all duration-500">
+                  {step.phase}
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">{step.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{step.description}</p>
+                
+                <div className="relative mb-8 mt-4">
+                  <div className={`w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-900/50 flex items-center justify-center shadow-inner group-hover:rotate-[10deg] transition-all duration-500 relative z-10`}>
+                    <span className={`material-icons-round ${step.iconColor} text-3xl`}>{step.icon}</span>
+                  </div>
+                  <div className={`absolute -inset-2 bg-primary/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
+                </div>
+
+                <h3 className="text-2xl font-black mb-4 text-gray-900 dark:text-white">{step.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base leading-relaxed font-medium mb-6">
+                  {step.description}
+                </p>
+                
+                <div className="flex items-center gap-2 text-primary font-bold text-xs">
+                  <span>أكتشف المزيد</span>
+                  <span className="material-icons-round text-sm group-hover:translate-x-[-4px] transition-transform">arrow_back</span>
+                </div>
               </div>
             ))}
           </div>
+
+          {expandedStep && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm animate-fade-in">
+              <div 
+                className="bg-white dark:bg-surface-dark w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden animate-reveal relative border border-gray-100 dark:border-gray-800"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button 
+                  onClick={() => setExpandedStep(null)}
+                  className="absolute top-6 left-6 w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all z-20"
+                >
+                  <span className="material-icons-round">close</span>
+                </button>
+
+                <div className="p-8 md:p-12">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center">
+                      <span className={`material-icons-round ${expandedStep.iconColor} text-4xl`}>{expandedStep.icon}</span>
+                    </div>
+                    <div>
+                      <span className="text-xs font-black text-primary uppercase tracking-widest block mb-1">{expandedStep.phase}</span>
+                      <h3 className="text-3xl font-black text-gray-900 dark:text-white">{expandedStep.title}</h3>
+                    </div>
+                  </div>
+
+                  <div className="prose dark:prose-invert max-w-none">
+                    <p 
+                      className="text-lg md:text-xl text-gray-600 dark:text-gray-300 leading-relaxed font-medium"
+                      dangerouslySetInnerHTML={{ __html: expandedStep.longDescription || expandedStep.description }}
+                    />
+                  </div>
+
+                  <div className="mt-12 pt-8 border-t border-gray-50 dark:border-gray-800">
+                    <button 
+                      onClick={openWhatsApp}
+                      className="w-full bg-primary text-white font-black py-5 rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary/90 transition-all flex items-center justify-center gap-3"
+                    >
+                      <span className="material-icons-round">rocket_launch</span>
+                      ابدأ هذه المرحلة الآن
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute inset-0 -z-10" onClick={() => setExpandedStep(null)}></div>
+            </div>
+          )}
 
           <div className="text-center mt-10 reveal-on-scroll">
              <button 
@@ -389,66 +480,110 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Testimonials Section */}
-        <section className="mb-28 reveal-on-scroll">
+        {/* Testimonials Carousel Section */}
+        <section className="mb-28 reveal-on-scroll overflow-hidden relative py-12">
           <div className="text-center mb-16">
             <h2 className="text-2xl md:text-4xl font-black text-gray-900 dark:text-white mb-4">ماذا قالوا عن البرنامج؟</h2>
             <p className="text-sm md:text-lg text-gray-500 dark:text-gray-400">قصص نجاح حقيقية لمصممين بدأوا من الصفر.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {TESTIMONIALS.map((testimonial, idx) => (
-              <div 
-                key={idx} 
-                className="bg-white dark:bg-surface-dark p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm hover-lift relative group flex flex-col"
-                style={{ transitionDelay: `${idx * 200}ms` }}
+
+          <div className="relative max-w-6xl mx-auto px-4 group/slider">
+            {/* Arrows Navigation */}
+            <div className="absolute top-1/2 -translate-y-1/2 -left-2 md:-left-8 lg:-left-16 z-20">
+              <button 
+                onClick={prevTestimonial}
+                className="w-10 h-10 md:w-14 md:h-14 rounded-full bg-white dark:bg-surface-dark shadow-2xl border border-gray-100 dark:border-gray-800 text-primary flex items-center justify-center hover:scale-110 active:scale-90 transition-all group/btn"
               >
-                <div className="absolute -top-4 -right-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
-                  <span className="material-icons-round">format_quote</span>
-                </div>
-                
-                <p className="text-gray-600 dark:text-gray-400 mb-6 italic leading-relaxed text-sm md:text-base flex-grow">
-                  "{testimonial.text}"
-                </p>
+                <span className="material-icons-round text-2xl md:text-3xl">arrow_forward</span>
+              </button>
+            </div>
+            <div className="absolute top-1/2 -translate-y-1/2 -right-2 md:-right-8 lg:-right-16 z-20">
+              <button 
+                onClick={nextTestimonial}
+                className="w-10 h-10 md:w-14 md:h-14 rounded-full bg-white dark:bg-surface-dark shadow-2xl border border-gray-100 dark:border-gray-800 text-primary flex items-center justify-center hover:scale-110 active:scale-90 transition-all group/btn"
+              >
+                <span className="material-icons-round text-2xl md:text-3xl">arrow_back</span>
+              </button>
+            </div>
 
-                {testimonial.audioUrl && (
-                  <AudioPlayer src={testimonial.audioUrl} />
-                )}
+            {/* Slider Track with Blur Mask */}
+            <div className="relative overflow-hidden">
+               <div 
+                 className="flex transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
+                 style={{ transform: `translateX(${testimonialIndex * 100}%)` }}
+               >
+                 {TESTIMONIALS.map((testimonial, idx) => (
+                   <div key={idx} className="w-full shrink-0 px-2 md:px-10">
+                     <div className="bg-white dark:bg-surface-dark p-8 md:p-14 lg:p-16 rounded-[4rem] border border-gray-100 dark:border-gray-800 shadow-2xl shadow-primary/5 relative group h-full flex flex-col items-center justify-center text-center overflow-hidden min-h-[450px] md:min-h-[500px]">
+                        
+                        {/* Background Quote Icon - Fixed visibility and style */}
+                        <div className="absolute top-8 right-12 text-gray-100 dark:text-gray-800 pointer-events-none -z-0">
+                          <span className="material-icons-round text-[120px] md:text-[180px] opacity-40">format_quote</span>
+                        </div>
+                        
+                        <div className="relative z-10 w-full max-w-3xl flex flex-col items-center">
+                          <p className="text-gray-700 dark:text-gray-300 mb-10 italic leading-[1.6] md:leading-[1.8] text-lg md:text-2xl lg:text-3xl font-medium">
+                            "{testimonial.text}"
+                          </p>
 
-                <div className="flex items-center justify-between border-t border-gray-50 dark:border-gray-800 pt-6 mt-6">
-                  <div className="flex items-center gap-4">
-                    <img 
-                      src={testimonial.avatar} 
-                      alt={testimonial.name} 
-                      className="w-14 h-14 rounded-full border-2 border-primary/20 group-hover:border-primary transition-colors"
-                    />
-                    <div>
-                      <h4 className="font-black text-gray-900 dark:text-white text-sm md:text-base">{testimonial.name}</h4>
-                      <p className="text-[10px] md:text-xs text-primary font-bold">{testimonial.role}</p>
-                    </div>
-                  </div>
-                  
-                  {testimonial.instagram && (
-                    <a 
-                      href={testimonial.instagram} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center justify-center text-white shadow-lg shadow-pink-500/20 hover:scale-110 active:scale-95 transition-transform"
-                    >
-                      <i className="material-icons-round text-xl">camera_alt</i>
-                    </a>
-                  )}
-                </div>
-              </div>
-            ))}
+                          {testimonial.audioUrl && (
+                            <div className="w-full max-w-md mb-10">
+                              <AudioPlayer src={testimonial.audioUrl} />
+                            </div>
+                          )}
+
+                          <div className="flex flex-col items-center mt-4">
+                            <div className="relative mb-4">
+                              <img 
+                                src={testimonial.avatar} 
+                                alt={testimonial.name} 
+                                className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-primary/10 group-hover:scale-110 transition-transform shadow-lg"
+                              />
+                              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white border-2 border-white dark:border-surface-dark">
+                                <span className="material-icons-round text-[10px]">check</span>
+                              </div>
+                            </div>
+                            <h4 className="font-black text-gray-900 dark:text-white text-xl md:text-2xl mb-1">{testimonial.name}</h4>
+                            <p className="text-sm text-primary font-bold mb-6">{testimonial.role}</p>
+                            
+                            {testimonial.instagram && (
+                              <a 
+                                href={testimonial.instagram} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="px-6 py-2.5 rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center gap-2 text-white text-sm font-bold shadow-xl shadow-pink-500/20 hover:scale-105 active:scale-95 transition-all"
+                              >
+                                <i className="material-icons-round text-base">camera_alt</i>
+                                تابع على إنستقرام
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+            </div>
+
+            {/* Pagination Dots */}
+            <div className="flex justify-center gap-3 mt-12">
+              {TESTIMONIALS.map((_, i) => (
+                <button 
+                  key={i}
+                  onClick={() => setTestimonialIndex(i)}
+                  className={`h-2.5 rounded-full transition-all duration-500 ${testimonialIndex === i ? 'w-10 bg-primary shadow-lg shadow-primary/20' : 'w-2.5 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700'}`}
+                />
+              ))}
+            </div>
           </div>
 
-          <div className="mt-16 text-center reveal-on-scroll">
+          <div className="mt-20 text-center reveal-on-scroll">
             <button 
               onClick={openWhatsApp}
-              className="inline-flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#20ba5a] text-white font-black px-5 sm:px-8 py-3 sm:py-3.5 rounded-2xl shadow-xl shadow-green-500/30 transition-all hover:scale-105 active:scale-95 group mx-auto max-w-[90%] sm:max-w-max"
+              className="inline-flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#20ba5a] text-white font-black px-6 sm:px-8 py-3.5 rounded-2xl shadow-xl shadow-green-500/30 transition-all hover:scale-105 active:scale-95 group mx-auto"
             >
-              <span className="material-icons-round text-2xl sm:text-3xl transition-transform group-hover:rotate-12 flex items-center">whatsapp</span>
-              <span className="text-sm sm:text-lg leading-none flex items-center h-full">تواصل معي مباشر عبر الواتساب</span>
+              <span className="material-icons-round text-2xl md:text-3xl transition-transform group-hover:rotate-12">whatsapp</span>
+              <span className="text-sm md:text-lg">تحدث معي مباشرة عبر الواتساب</span>
             </button>
           </div>
         </section>
@@ -458,7 +593,6 @@ const App: React.FC = () => {
           <div className="max-w-2xl mx-auto">
             <h2 className="text-2xl md:text-4xl font-black text-gray-900 dark:text-white mb-12 text-center">الخطة الزمنية (21 يوماً)</h2>
             <div ref={timelineRef} className="relative border-r-2 border-dashed border-gray-200 dark:border-gray-800 mr-4 space-y-10">
-              {/* Progress Line Overlay */}
               <div 
                 className="absolute right-[-2px] top-0 w-[2px] bg-primary transition-all duration-300 ease-out z-10"
                 style={{ height: `${timelineProgress * 100}%` }}
@@ -502,7 +636,7 @@ const App: React.FC = () => {
             
             {joinStep === 'input' && (
               <div className="animate-reveal">
-                <h2 className="text-3xl md:text-5xl font-black mb-6">جاهز لبناء نظامك الخاص؟</h2>
+                <h2 className="text-3xl md:text-5xl font-black mb-6">جاهز لبناء نظامك الخاص?</h2>
                 <p className="text-sm md:text-lg opacity-90 mb-10 max-w-lg mx-auto">المقاعد محدودة جداً لأن كل طالب يحصل على توجيه فردي كامل. سجل اهتمامك الآن.</p>
                 <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3 mb-8">
                   <input 
@@ -522,18 +656,34 @@ const App: React.FC = () => {
                   </button>
                 </form>
 
-                {/* Socials Contact Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-right mb-10 px-4">
+                  {LEARNING_POINTS.map((point, idx) => (
+                    <div 
+                      key={idx} 
+                      className="flex items-start gap-3 p-3 bg-white/10 rounded-xl border border-white/5 hover:bg-white/15 transition-all animate-reveal group"
+                      style={{ animationDelay: `${idx * 100}ms` }}
+                    >
+                      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-secondary group-hover:scale-110 transition-all duration-300">
+                        <span className="material-icons-round text-white text-sm">check</span>
+                      </div>
+                      <span className="text-sm md:text-base font-medium opacity-90 group-hover:opacity-100 transition-opacity leading-relaxed">
+                        {point}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
                 <div className="pt-8 border-t border-white/10 flex flex-col items-center gap-4">
                    <p className="text-xs font-bold opacity-70 uppercase tracking-widest">طرق أخرى للتواصل السريع</p>
                    <div className="flex items-center gap-6">
                       <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all hover:scale-110 active:scale-95" title="LinkedIn">
                         <span className="material-icons-round">verified</span>
                       </a>
-                      <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all hover:scale-110 active:scale-95" title="Instagram">
-                         <span className="material-icons-round">camera_alt</span>
+                      <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="text-gray-400 dark:text-gray-400 hover:text-pink-600 transition-colors">
+                        <span className="material-icons-round">camera_alt</span>
                       </a>
-                      <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all hover:scale-110 active:scale-95" title="WhatsApp">
-                         <span className="material-icons-round">chat</span>
+                      <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="text-gray-400 dark:text-gray-400 hover:text-green-500 transition-colors">
+                        <span className="material-icons-round">chat</span>
                       </a>
                    </div>
                 </div>
@@ -588,7 +738,10 @@ const App: React.FC = () => {
 
       <footer className="bg-white dark:bg-surface-dark border-t border-gray-100 dark:border-gray-800 py-12 px-6 reveal-on-scroll">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex items-center gap-2 group cursor-pointer" onClick={openWhatsApp}>
+          <div 
+            className="flex items-center gap-2 group cursor-pointer" 
+            onClick={() => scrollToSection('hero-section')}
+          >
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center group-hover:rotate-[360deg] transition-transform duration-700">
               <span className="material-icons-round text-white text-xl">layers</span>
             </div>
@@ -596,7 +749,7 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex flex-col items-center md:items-end gap-3">
-             <p className="text-sm text-gray-500 dark:text-gray-400">© 2024 جميع الحقوق محفوظة للنظام التدريبي.</p>
+             <p className="text-sm text-gray-500 dark:text-gray-400">© 2025 جميع الحقوق محفوظة للنظام التدريبي.</p>
              <div className="flex items-center gap-4">
                 <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-600 transition-colors">
                   <span className="material-icons-round">verified</span>

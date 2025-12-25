@@ -3,6 +3,7 @@ export interface Step {
   id: number;
   title: string;
   description: string;
+  longDescription?: string;
   phase: string;
   icon: string;
   iconColor: string;
