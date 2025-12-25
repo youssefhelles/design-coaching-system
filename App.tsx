@@ -65,7 +65,6 @@ const AudioPlayer: React.FC<{ src: string }> = ({ src }) => {
       } else {
         setIsLoading(true);
         setHasError(false);
-        // Ensure the audio source is properly loaded before playing
         audioRef.current.load();
         audioRef.current.play().then(() => {
           setIsPlaying(true);
@@ -155,7 +154,7 @@ const App: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [timelineProgress, setTimelineProgress] = useState(0);
-  const [expandedStep, setExpandedStep] = useState<Step | null>(null);
+  const [activeStepId, setActiveStepId] = useState<number | null>(null);
   const [testimonialIndex, setTestimonialIndex] = useState(0);
   const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -166,11 +165,9 @@ const App: React.FC = () => {
       if (timelineRef.current) {
         const rect = timelineRef.current.getBoundingClientRect();
         const windowHeight = window.innerHeight;
-        
         const start = rect.top;
         const height = rect.height;
         const progress = Math.max(0, Math.min(1, (windowHeight / 2 - start) / height));
-        
         setTimelineProgress(progress);
       }
     };
@@ -179,15 +176,6 @@ const App: React.FC = () => {
     updateTimelineProgress();
     return () => window.removeEventListener('scroll', updateTimelineProgress);
   }, []);
-
-  // Prevent background scroll when modal is open
-  useEffect(() => {
-    if (expandedStep) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-  }, [expandedStep]);
 
   const RECIPIENT = "ye444sf@gmail.com";
   const WHATSAPP_URL = 'https://wa.me/972597713882';
@@ -253,6 +241,10 @@ const App: React.FC = () => {
 
   const prevTestimonial = () => {
     setTestimonialIndex((prev) => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
+  };
+
+  const toggleStep = (id: number) => {
+    setActiveStepId(activeStepId === id ? null : id);
   };
 
   return (
@@ -367,94 +359,71 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Methodology Section */}
+        {/* Methodology Section - UPDATED TO TOGGLE */}
         <section id="methodology-section" className="relative mb-28 scroll-mt-24 reveal-on-scroll">
           <div className="mb-14 text-center max-w-2xl mx-auto">
             <h2 className="text-2xl md:text-4xl font-black mb-4 text-gray-900 dark:text-white">منهجية المصمم المتكامل</h2>
             <p className="text-sm md:text-lg text-gray-500 dark:text-gray-400">ثلاث مراحل مدروسة بعناية لإيصالك للاحتراف الحقيقي في سوق العمل.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {STEPS.map((step, idx) => (
-              <div 
-                key={step.id} 
-                className="relative bg-white/80 dark:bg-surface-dark/80 backdrop-blur-md p-8 pt-12 rounded-[2.5rem] border border-gray-200/50 dark:border-gray-700/30 shadow-xl shadow-primary/5 hover-lift group overflow-hidden cursor-pointer"
-                onClick={() => setExpandedStep(step)}
-                style={{ transitionDelay: `${idx * 150}ms` }}
-              >
-                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${idx === 0 ? 'from-primary/20' : idx === 1 ? 'from-blue-500/20' : 'from-green-500/20'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-2xl -z-10`}></div>
-                
-                <div className="absolute top-6 left-8 bg-primary/10 text-primary text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-primary/10 group-hover:bg-primary group-hover:text-white transition-all duration-500">
-                  {step.phase}
-                </div>
-                
-                <div className="relative mb-8 mt-4">
-                  <div className={`w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-900/50 flex items-center justify-center shadow-inner group-hover:rotate-[10deg] transition-all duration-500 relative z-10`}>
-                    <span className={`material-icons-round ${step.iconColor} text-3xl`}>{step.icon}</span>
-                  </div>
-                  <div className={`absolute -inset-2 bg-primary/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
-                </div>
-
-                <h3 className="text-2xl font-black mb-4 text-gray-900 dark:text-white">{step.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base leading-relaxed font-medium mb-6">
-                  {step.description}
-                </p>
-                
-                <div className="flex items-center gap-2 text-primary font-bold text-xs">
-                  <span>أكتشف المزيد</span>
-                  <span className="material-icons-round text-sm group-hover:translate-x-[-4px] transition-transform">arrow_back</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {expandedStep && (
-            <div 
-              className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-slate-900/20 dark:bg-slate-900/40 backdrop-blur-2xl animate-fade-in"
-              onClick={() => setExpandedStep(null)}
-            >
-              <div 
-                className="bg-white dark:bg-surface-dark w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden animate-reveal relative border border-gray-100 dark:border-gray-800"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button 
-                  onClick={() => setExpandedStep(null)}
-                  className="absolute top-6 left-6 w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all z-20"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 items-start">
+            {STEPS.map((step, idx) => {
+              const isExpanded = activeStepId === step.id;
+              return (
+                <div 
+                  key={step.id} 
+                  className={`relative bg-white/80 dark:bg-surface-dark/80 backdrop-blur-md p-8 pt-12 rounded-[2.5rem] border transition-all duration-500 overflow-hidden cursor-pointer ${isExpanded ? 'border-primary ring-4 ring-primary/5 shadow-2xl scale-[1.02]' : 'border-gray-200/50 dark:border-gray-700/30 shadow-xl shadow-primary/5 hover:border-gray-300'}`}
+                  onClick={() => toggleStep(step.id)}
+                  style={{ transitionDelay: `${idx * 150}ms` }}
                 >
-                  <span className="material-icons-round">close</span>
-                </button>
-
-                <div className="p-8 md:p-12">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center">
-                      <span className={`material-icons-round ${expandedStep.iconColor} text-4xl`}>{expandedStep.icon}</span>
-                    </div>
-                    <div>
-                      <span className="text-xs font-black text-primary uppercase tracking-widest block mb-1">{expandedStep.phase}</span>
-                      <h3 className="text-3xl font-black text-gray-900 dark:text-white">{expandedStep.title}</h3>
+                  <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${idx === 0 ? 'from-primary/20' : idx === 1 ? 'from-blue-500/20' : 'from-green-500/20'} to-transparent opacity-0 transition-opacity duration-700 blur-2xl -z-10 ${isExpanded ? 'opacity-100' : ''}`}></div>
+                  
+                  <div className={`absolute top-6 left-8 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border transition-all duration-500 ${isExpanded ? 'bg-primary text-white border-primary' : 'bg-primary/10 text-primary border-primary/10'}`}>
+                    {step.phase}
+                  </div>
+                  
+                  <div className="relative mb-8 mt-4">
+                    <div className={`w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-900/50 flex items-center justify-center shadow-inner transition-all duration-500 relative z-10 ${isExpanded ? 'rotate-12 scale-110' : ''}`}>
+                      <span className={`material-icons-round ${step.iconColor} text-3xl`}>{step.icon}</span>
                     </div>
                   </div>
 
-                  <div className="prose dark:prose-invert max-w-none">
-                    <p 
-                      className="text-lg md:text-xl text-gray-600 dark:text-gray-300 leading-relaxed font-medium"
-                      dangerouslySetInnerHTML={{ __html: expandedStep.longDescription || expandedStep.description }}
-                    />
+                  <h3 className="text-2xl font-black mb-4 text-gray-900 dark:text-white">{step.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base leading-relaxed font-medium mb-6">
+                    {step.description}
+                  </p>
+                  
+                  <div 
+                    className={`grid transition-all duration-500 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mb-6' : 'grid-rows-[0fr] opacity-0'}`}
+                    style={{ display: 'grid', gridTemplateRows: isExpanded ? '1fr' : '0fr' }}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+                        <p 
+                          className="text-gray-700 dark:text-gray-300 text-sm md:text-base leading-relaxed font-medium"
+                          dangerouslySetInnerHTML={{ __html: step.longDescription || step.description }}
+                        />
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); openWhatsApp(); }}
+                          className="mt-6 w-full bg-primary text-white font-black py-3 rounded-xl shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all text-sm flex items-center justify-center gap-2"
+                        >
+                          <span className="material-icons-round text-lg">rocket_launch</span>
+                          ابدأ هذه المرحلة
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="mt-12 pt-8 border-t border-gray-50 dark:border-gray-800">
-                    <button 
-                      onClick={openWhatsApp}
-                      className="w-full bg-primary text-white font-black py-5 rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary/90 transition-all flex items-center justify-center gap-3"
-                    >
-                      <span className="material-icons-round">rocket_launch</span>
-                      ابدأ هذه المرحلة الآن
-                    </button>
+                  <div className={`flex items-center gap-2 font-bold text-xs transition-colors ${isExpanded ? 'text-red-500' : 'text-primary'}`}>
+                    <span>{isExpanded ? 'إغلاق التفاصيل' : 'أكتشف المزيد'}</span>
+                    <span className={`material-icons-round text-sm transition-all duration-500 ${isExpanded ? 'rotate-180' : 'translate-x-[-4px]'}`}>
+                      {isExpanded ? 'expand_less' : 'arrow_back'}
+                    </span>
                   </div>
                 </div>
-              </div>
-            </div>
-          )}
+              );
+            })}
+          </div>
 
           <div className="text-center mt-10 reveal-on-scroll">
              <button 
@@ -499,7 +468,6 @@ const App: React.FC = () => {
           </div>
 
           <div className="relative max-w-6xl mx-auto px-4 group/slider">
-            {/* Arrows Navigation */}
             <div className="absolute top-1/2 -translate-y-1/2 -left-2 md:-left-8 lg:-left-16 z-20">
               <button 
                 onClick={prevTestimonial}
@@ -517,7 +485,6 @@ const App: React.FC = () => {
               </button>
             </div>
 
-            {/* Slider Track with Blur Mask */}
             <div className="relative overflow-hidden">
                <div 
                  className="flex transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
@@ -527,7 +494,6 @@ const App: React.FC = () => {
                    <div key={idx} className="w-full shrink-0 px-2 md:px-10">
                      <div className="bg-white dark:bg-surface-dark p-8 md:p-14 lg:p-16 rounded-[4rem] border border-gray-100 dark:border-gray-800 shadow-2xl shadow-primary/5 relative group h-full flex flex-col items-center justify-center text-center overflow-hidden min-h-[450px] md:min-h-[500px]">
                         
-                        {/* Background Quote Icon - Fixed visibility and style */}
                         <div className="absolute top-8 right-12 text-gray-100 dark:text-gray-800 pointer-events-none -z-0">
                           <span className="material-icons-round text-[120px] md:text-[180px] opacity-40">format_quote</span>
                         </div>
@@ -576,7 +542,6 @@ const App: React.FC = () => {
                </div>
             </div>
 
-            {/* Pagination Dots */}
             <div className="flex justify-center gap-3 mt-12">
               {TESTIMONIALS.map((_, i) => (
                 <button 
@@ -672,7 +637,7 @@ const App: React.FC = () => {
                     <div 
                       key={idx} 
                       className="flex items-start gap-3 p-3 bg-white/10 rounded-xl border border-white/5 hover:bg-white/15 transition-all animate-reveal group"
-                      style={{ animationDelay: `${point === LEARNING_POINTS[0] ? 0 : idx * 100}ms` }}
+                      style={{ animationDelay: `${idx * 100}ms` }}
                     >
                       <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-secondary group-hover:scale-110 transition-all duration-300">
                         <span className="material-icons-round text-white text-sm">check</span>
