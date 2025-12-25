@@ -359,7 +359,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Methodology Section - UPDATED TO TOGGLE */}
+        {/* Methodology Section - RE-IMPLEMENTED AS TOGGLE */}
         <section id="methodology-section" className="relative mb-28 scroll-mt-24 reveal-on-scroll">
           <div className="mb-14 text-center max-w-2xl mx-auto">
             <h2 className="text-2xl md:text-4xl font-black mb-4 text-gray-900 dark:text-white">منهجية المصمم المتكامل</h2>
@@ -372,7 +372,7 @@ const App: React.FC = () => {
               return (
                 <div 
                   key={step.id} 
-                  className={`relative bg-white/80 dark:bg-surface-dark/80 backdrop-blur-md p-8 pt-12 rounded-[2.5rem] border transition-all duration-500 overflow-hidden cursor-pointer ${isExpanded ? 'border-primary ring-4 ring-primary/5 shadow-2xl scale-[1.02]' : 'border-gray-200/50 dark:border-gray-700/30 shadow-xl shadow-primary/5 hover:border-gray-300'}`}
+                  className={`relative bg-white dark:bg-surface-dark p-8 pt-12 rounded-[2.5rem] border transition-all duration-500 overflow-hidden cursor-pointer ${isExpanded ? 'border-primary ring-4 ring-primary/5 shadow-2xl' : 'border-gray-200/50 dark:border-gray-700/30 shadow-xl shadow-primary/5 hover:border-gray-300'}`}
                   onClick={() => toggleStep(step.id)}
                   style={{ transitionDelay: `${idx * 150}ms` }}
                 >
