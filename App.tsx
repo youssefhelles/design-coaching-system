@@ -8,8 +8,8 @@ import { Step } from './types';
 
 const getMailData = (option: string, email: string) => {
   return {
-    subject: `النظام | اختيار المسار: ${option}`,
-    body: `مرحباً يوسف،\n\nأنا مهتم ببرنامج "النظام" التدريبي.\n\nالمسار المختار: ${option}\nبريدي الإلكتروني: ${email}\n\nأتطلع للتواصل معك لبدء رحلتي في هذا المسار.`
+    subject: `النظام | المسار المختار: ${option}`,
+    body: `مرحباً يوسف،\n\nأنا مهتم ببرنامج "النظام" التدريبي.\n\nالمسار الذي اخترته: ${option}\nبريدي الإلكتروني: ${email}\n\nأتطلع للتواصل معك لبدء التدريب قريباً.`
   };
 };
 
@@ -436,7 +436,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Tracks Section - UPDATED WITH FULL LISTS */}
+        {/* Tracks Section - UPDATED WITH CHECKLISTS */}
         <section id="tracks-section" className="mb-28 reveal-on-scroll scroll-mt-24">
           <div className="text-center mb-16 max-w-4xl mx-auto">
             <h2 className="text-2xl md:text-4xl font-black text-gray-900 dark:text-white mb-6">مسارات مخصصة لأهدافك</h2>
@@ -689,7 +689,7 @@ const App: React.FC = () => {
             {joinStep === 'options' && (
               <div className="animate-reveal">
                 <h2 className="text-2xl md:text-4xl font-black mb-2">ما هو المسار الذي يلهمك للبدء؟</h2>
-                <p className="text-sm opacity-80 mb-8">اختيارك سيساعدنا على البدء فوراً في رسم مسارك المخصص.</p>
+                <p className="text-sm opacity-80 mb-8">اختيارك سيساعدنا على البدء فوراً في رسم مسارك المخصص واختصار وقتنا معاً.</p>
                 <div className="grid grid-cols-1 gap-3 text-right">
                   {TRACKS.map((track) => (
                     <button
@@ -711,7 +711,7 @@ const App: React.FC = () => {
                   <button
                     type="button"
                     disabled={isSubmitting}
-                    onClick={() => handleOptionSelect("استفسار عام")}
+                    onClick={() => handleOptionSelect("استفسار عام حول البرنامج")}
                     className="mt-2 bg-transparent hover:bg-white/5 border border-dashed border-white/30 p-4 rounded-2xl text-center flex items-center justify-center gap-2 group transition-all disabled:opacity-50"
                   >
                     <span className="text-sm font-bold opacity-80">لدي استفسار عام حول البرنامج</span>
