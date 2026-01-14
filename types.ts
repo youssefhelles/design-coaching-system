@@ -17,6 +17,7 @@ export interface Track {
   result: string;
   icon: string;
   color: string;
+  checklist?: string[];
 }
 
 export interface TimelineStep {

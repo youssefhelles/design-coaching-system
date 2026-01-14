@@ -8,8 +8,8 @@ import { Step } from './types';
 
 const getMailData = (option: string, email: string) => {
   return {
-    subject: `النظام: ${option}`,
-    body: `مرحباً يوسف،\n\nأنا مهتم ببرنامج "النظام" التدريبي.\n\nالخيار المختار: ${option}\nبريدي الإلكتروني: ${email}\n\nأتطلع للتواصل معك ومعرفة التفاصيل.`
+    subject: `النظام | اختيار المسار: ${option}`,
+    body: `مرحباً يوسف،\n\nأنا مهتم ببرنامج "النظام" التدريبي.\n\nالمسار المختار: ${option}\nبريدي الإلكتروني: ${email}\n\nأتطلع للتواصل معك لبدء رحلتي في هذا المسار.`
   };
 };
 
@@ -359,7 +359,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Methodology Section - RE-IMPLEMENTED AS TOGGLE */}
+        {/* Methodology Section */}
         <section id="methodology-section" className="relative mb-28 scroll-mt-24 reveal-on-scroll">
           <div className="mb-14 text-center max-w-2xl mx-auto">
             <h2 className="text-2xl md:text-4xl font-black mb-4 text-gray-900 dark:text-white">منهجية المصمم المتكامل</h2>
@@ -436,24 +436,44 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Tracks Section */}
-        <section id="tracks-section" className="mb-28 reveal-on-scroll">
-          <div className="text-center mb-14">
-            <h2 className="text-2xl md:text-4xl font-black text-gray-900 dark:text-white mb-4">مسارات مخصصة لأهدافك</h2>
-            <p className="text-sm md:text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">نحن لا نبيع منهجاً ثابتاً، بل نصمم المسار حسب وجهتك وطموحك الشخصي.</p>
+        {/* Tracks Section - UPDATED WITH FULL LISTS */}
+        <section id="tracks-section" className="mb-28 reveal-on-scroll scroll-mt-24">
+          <div className="text-center mb-16 max-w-4xl mx-auto">
+            <h2 className="text-2xl md:text-4xl font-black text-gray-900 dark:text-white mb-6">مسارات مخصصة لأهدافك</h2>
+            <p className="text-sm md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+              في تدريبنا الفردي، لا نؤمن بالحلول المعلبة. لأن أهداف تعلم <span className="text-primary font-bold">"كانفا"</span> تختلف، نبدأ رحلتنا معك بتحديد هدفك الدقيق، لنرسم لك مساراً عملياً يناسب طموحك. إليك ما يمكننا التركيز عليه معاً بناءً على مسارك المختار:
+            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             {TRACKS.map((track, idx) => (
               <div 
                 key={track.id} 
-                className="bg-white dark:bg-surface-dark p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col h-full hover-lift transition-all"
+                className="bg-white dark:bg-surface-dark p-8 md:p-10 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col h-full hover-lift transition-all group"
                 style={{ transitionDelay: `${idx * 150}ms` }}
               >
-                <span className={`material-icons-round text-${track.color} text-4xl mb-6`}>{track.icon}</span>
-                <h3 className="font-black text-xl mb-3">{track.title}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 flex-grow leading-relaxed">{track.description}</p>
-                <div className={`mt-6 pt-6 border-t border-gray-50 dark:border-gray-800 text-base font-bold text-${track.color}`}>
-                  النتيجة النهائية: {track.result}
+                <div className={`w-16 h-16 rounded-2xl bg-${track.color}/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                  <span className={`material-icons-round text-${track.color} text-4xl`}>{track.icon}</span>
+                </div>
+                
+                <h3 className="font-black text-xl md:text-2xl mb-1 text-gray-900 dark:text-white leading-tight">{track.title}</h3>
+                <p className="text-[10px] font-bold text-gray-400 mb-4 uppercase tracking-wider">{track.goal}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 font-medium leading-relaxed">{track.description}</p>
+                
+                <div className="flex-grow space-y-3 mb-8">
+                  <p className="text-[10px] font-black text-gray-900 dark:text-white uppercase mb-2">ماذا ستتقن في هذا المسار؟</p>
+                  {track.checklist?.map((item, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <div className={`w-4 h-4 rounded-full bg-${track.color}/10 flex items-center justify-center shrink-0 mt-1`}>
+                        <span className={`material-icons-round text-${track.color} text-[8px] font-black`}>check</span>
+                      </div>
+                      <span className="text-[13px] md:text-sm text-gray-600 dark:text-gray-400 font-medium leading-tight">{item}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className={`mt-auto pt-6 border-t border-gray-50 dark:border-gray-800 text-xs font-black text-${track.color} flex items-center gap-2 uppercase tracking-wide`}>
+                  <span className="material-icons-round text-sm">auto_awesome</span>
+                  النتيجة: {track.result}
                 </div>
               </div>
             ))}
@@ -605,7 +625,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Join Section */}
+        {/* Join Section - UPDATED WITH TRACK SELECTION */}
         <section id="join-section" className="bg-primary text-white rounded-[3rem] p-10 md:p-20 text-center shadow-2xl shadow-primary/20 scroll-mt-24 relative overflow-hidden mb-20 reveal-on-scroll">
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-50 animate-pulse-soft"></div>
           <div className="relative z-10 max-w-2xl mx-auto">
@@ -668,26 +688,35 @@ const App: React.FC = () => {
 
             {joinStep === 'options' && (
               <div className="animate-reveal">
-                <h2 className="text-2xl md:text-4xl font-black mb-4">ما هو هدفك من التواصل؟</h2>
+                <h2 className="text-2xl md:text-4xl font-black mb-2">ما هو المسار الذي يلهمك للبدء؟</h2>
+                <p className="text-sm opacity-80 mb-8">اختيارك سيساعدنا على البدء فوراً في رسم مسارك المخصص.</p>
                 <div className="grid grid-cols-1 gap-3 text-right">
-                  {[
-                    "ارغب في الانضمام للبرنامج",
-                    "ارغب في حجز مقعد للفوج القادم",
-                    "ارغب في الاستفسار عن تفاصيل البرنامج"
-                  ].map((option, idx) => (
+                  {TRACKS.map((track) => (
                     <button
-                      key={idx}
+                      key={track.id}
                       type="button"
                       disabled={isSubmitting}
-                      onClick={() => handleOptionSelect(option)}
+                      onClick={() => handleOptionSelect(track.title)}
                       className="bg-white/10 hover:bg-white/20 border border-white/20 p-5 rounded-2xl text-right flex items-center justify-between group transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
                     >
-                      <span className="font-bold text-lg">{option}</span>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-lg">{track.title}</span>
+                        <span className="text-xs opacity-70 font-medium">{track.goal}</span>
+                      </div>
                       <span className="material-icons-round group-hover:translate-x-[-8px] transition-transform text-2xl">
-                        {isSubmitting && selectedOption === option ? 'sync' : 'open_in_new'}
+                        {isSubmitting && selectedOption === track.title ? 'sync' : 'rocket_launch'}
                       </span>
                     </button>
                   ))}
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => handleOptionSelect("استفسار عام")}
+                    className="mt-2 bg-transparent hover:bg-white/5 border border-dashed border-white/30 p-4 rounded-2xl text-center flex items-center justify-center gap-2 group transition-all disabled:opacity-50"
+                  >
+                    <span className="text-sm font-bold opacity-80">لدي استفسار عام حول البرنامج</span>
+                    <span className="material-icons-round text-lg opacity-60">help_outline</span>
+                  </button>
                 </div>
               </div>
             )}
